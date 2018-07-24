@@ -2,14 +2,44 @@
 
 var express     = require('express');
 var bodyParser  = require('body-parser');
-var expect      = require('chai').expect;
 var cors        = require('cors');
+var logger      = require('morgan');
+const helmet    = require('helmet');
 
-var apiRoutes         = require('./routes/api.js');
-var fccTestingRoutes  = require('./routes/fcctesting.js');
+// Enable .env variables to be used
+require('dotenv').config();
+
+var apiRoutes         = require('./routes/api');
+var fccTestingRoutes  = require('./routes/fcctesting');
 var runner            = require('./test-runner');
 
 var app = express();
+
+// Security middlewares
+app.use(helmet({
+  frameguard: {
+    action: 'sameorigin'
+  },
+  contentSecurityPolicy: {
+   directives: {
+     defaultSrc: ["'none'"],
+      connectSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: [
+        "'self'",
+        'https://hyperdev.com/favicon-app.ico',
+        'http://glitch.com/favicon-app.ico',
+        'https://cdn.gomix.com/8f5547a1-a0d6-48f6-aa38-51753a0105f4%2FScreen%20Shot%202017-01-02%20at%201.04.10%20AM.png'
+      ],
+      scriptSrc: [
+        "'self'",
+        'https://code.jquery.com/jquery-2.2.1.min.js',
+        "'unsafe-inline'"
+      ]
+   }
+  },
+ dnsPrefetchControl: false
+}))
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
@@ -17,6 +47,9 @@ app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Logger
+app.use(logger('dev'));
 
 //Sample front-end
 app.route('/b/:board/')
@@ -38,13 +71,10 @@ app.route('/')
 fccTestingRoutes(app);
 
 //Routing for API 
-apiRoutes(app);
+app.use('/api', apiRoutes);
 
-//Sample Front-end
-
-    
 //404 Not Found Middleware
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.status(404)
     .type('text')
     .send('Not Found');
