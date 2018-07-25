@@ -8,12 +8,28 @@
 
 'use strict';
 
-var expect = require('chai').expect;
+const express = require('express');
+const router = express.Router();
 
-module.exports = function (app) {
-  
-  app.route('/api/threads/:board');
-    
-  app.route('/api/replies/:board');
+const thread_controller = require('../controllers/threadController');
+const reply_controller = require('../controllers/replyController');
 
-};
+// Threads routes
+router.get('/threads/:board', thread_controller.get_thread);
+
+router.post('/threads/:board', thread_controller.create_thread);
+
+router.put('/threads/:board', thread_controller.report_thread);
+
+router.delete('/threads/:board', thread_controller.delete_thread);
+
+// Replies routes
+router.get('/replies/:board', reply_controller.get_reply);
+
+router.post('/replies/:board', reply_controller.create_reply);
+
+router.put('/replies/:board', reply_controller.report_reply);
+
+router.delete('/replies/:board', reply_controller.delete_reply);
+
+module.exports = router;
