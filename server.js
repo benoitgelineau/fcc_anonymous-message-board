@@ -5,6 +5,7 @@ var bodyParser  = require('body-parser');
 var cors        = require('cors');
 var logger      = require('morgan');
 const helmet    = require('helmet');
+const initDb    = require('./db').initDb;
 
 // Enable .env variables to be used
 require('dotenv').config();
@@ -70,15 +71,18 @@ app.route('/')
 //For FCC testing purposes
 fccTestingRoutes(app);
 
-//Routing for API 
+//Routing for API
 app.use('/api', apiRoutes);
 
 //404 Not Found Middleware
 app.use(function (req, res, next) {
   res.status(404)
-    .type('text')
-    .send('Not Found');
+  .type('text')
+  .send('Not Found');
 });
+
+// Database connection
+initDb();
 
 //Start our server and tests!
 app.listen(process.env.PORT || 3000, function () {
